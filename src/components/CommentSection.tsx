@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, Trash2, MessageCircle } from 'lucide-react';
+import { Send, Trash2, MessageCircle, Pencil, Check, X } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -9,6 +9,28 @@ interface Comment {
   content: string;
   parent_id: string | null;
   created_at: string;
+}
+
+// 本浏览器发布过的评论 → 记录 id 到 token 的映射，用于自助编辑/删除
+function getMyTokens(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem('my_comment_tokens') || '{}');
+  } catch {
+    return {};
+  }
+}
+function rememberToken(id: string, token: string) {
+  const m = getMyTokens();
+  m[id] = token;
+  localStorage.setItem('my_comment_tokens', JSON.stringify(m));
+}
+function forgetToken(id: string) {
+  const m = getMyTokens();
+  delete m[id];
+  localStorage.setItem('my_comment_tokens', JSON.stringify(m));
+}
+function genToken() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
 export default function CommentSection({
@@ -24,10 +46,14 @@ export default function CommentSection({
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
+  const [myTokens, setMyTokens] = useState<Record<string, string>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   const { showToast } = useAuth();
 
   useEffect(() => {
     loadComments();
+    setMyTokens(getMyTokens());
   }, [reportId]);
 
   const loadComments = async () => {
@@ -43,8 +69,13 @@ export default function CommentSection({
     e.preventDefault();
     if (!name.trim() || !content.trim()) return;
     setLoading(true);
+    const token = genToken();
     try {
-      await apiRequest('POST', `/comments/${reportId}`, { author_name: name, content });
+      const created: any = await apiRequest('POST', `/comments/${reportId}`, { author_name: name, content, edit_token: token });
+      if (created?.id) {
+        rememberToken(created.id, token);
+        setMyTokens(getMyTokens());
+      }
       setContent('');
       showToast('评论已发布', 'success');
       loadComments();
@@ -55,10 +86,32 @@ export default function CommentSection({
     }
   };
 
-  const handleDelete = async (commentId: string) => {
+  // 可操作（编辑/删除）：作者 或 本人（持有 token）
+  const canManage = (id: string) => isAuthor || !!myTokens[id];
+
+  const startEdit = (c: Comment) => {
+    setEditingId(c.id);
+    setEditText(c.content);
+  };
+
+  const saveEdit = async (id: string) => {
+    if (!editText.trim()) return;
+    try {
+      await apiRequest('PUT', `/comments/${id}`, { content: editText, edit_token: myTokens[id] });
+      setEditingId(null);
+      showToast('评论已更新', 'success');
+      loadComments();
+    } catch (err: any) {
+      showToast(err.message || '更新失败', 'error');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
     if (!confirm('确定删除这条评论吗？')) return;
     try {
-      await apiRequest('DELETE', `/comments/${commentId}`);
+      await apiRequest('DELETE', `/comments/${id}`, { edit_token: myTokens[id] });
+      forgetToken(id);
+      setMyTokens(getMyTokens());
       showToast('评论已删除', 'success');
       loadComments();
     } catch (err: any) {
@@ -87,40 +140,82 @@ export default function CommentSection({
         </p>
       ) : (
         <div className="stack-4">
-          {comments.map((comment) => (
-            <div
-              key={comment.id}
-              className="rounded-[18px]"
-              style={{ background: 'rgba(255, 250, 243, 0.6)', border: '1px solid rgba(214, 210, 196, 0.55)', padding: 'var(--sp-4) var(--sp-5)' }}
-            >
-              {/* 名字 + 时间 + 删除 */}
-              <div className="flex items-center" style={{ gap: 'var(--sp-3)', marginBottom: 'var(--sp-2)' }}>
-                <span className="text-[15px] font-bold tracking-cn" style={{ color: '#514A43' }}>
-                  {comment.author_name}
-                </span>
-                <span className="text-[12px] tracking-cn" style={{ color: '#B6ADA3' }}>
-                  {formatDate(comment.created_at)}
-                </span>
-                {isAuthor && (
-                  <button
-                    onClick={() => handleDelete(comment.id)}
-                    className="ml-auto p-1 rounded-lg transition-all hover:bg-[rgba(251,238,234,0.9)]"
-                    style={{ color: '#C4B4A2' }}
-                    title="删除评论"
+          {comments.map((comment) => {
+            const mine = !!myTokens[comment.id];
+            const editable = canManage(comment.id);
+            const isEditing = editingId === comment.id;
+            return (
+              <div
+                key={comment.id}
+                className="rounded-[18px]"
+                style={{ background: 'rgba(255, 250, 243, 0.6)', border: '1px solid rgba(214, 210, 196, 0.55)', padding: 'var(--sp-4) var(--sp-5)' }}
+              >
+                {/* 名字 + 时间 + 操作 */}
+                <div className="flex items-center" style={{ gap: 'var(--sp-3)', marginBottom: 'var(--sp-2)' }}>
+                  <span className="text-[15px] font-bold tracking-cn" style={{ color: '#514A43' }}>
+                    {comment.author_name}
+                  </span>
+                  {mine && (
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-md tracking-cn" style={{ background: 'rgba(247,218,217,0.7)', color: '#B27A75', fontWeight: 600 }}>
+                      我
+                    </span>
+                  )}
+                  <span className="text-[12px] tracking-cn" style={{ color: '#B6ADA3' }}>
+                    {formatDate(comment.created_at)}
+                  </span>
+                  {editable && !isEditing && (
+                    <div className="ml-auto flex items-center gap-1">
+                      <button
+                        onClick={() => startEdit(comment)}
+                        className="p-1 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]"
+                        style={{ color: '#C4B4A2' }}
+                        title="编辑"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(comment.id)}
+                        className="p-1 rounded-lg transition-all hover:bg-[rgba(251,238,234,0.9)]"
+                        style={{ color: '#C4B4A2' }}
+                        title="删除"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 内容 / 编辑态 */}
+                {isEditing ? (
+                  <div>
+                    <textarea
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      rows={3}
+                      maxLength={1000}
+                      className="input-soft w-full outline-none resize-none tracking-cn"
+                      style={{ backgroundColor: 'rgba(255,255,255,0.85)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43', borderRadius: 12, padding: '10px 14px', fontSize: 14, lineHeight: 1.8 }}
+                    />
+                    <div className="flex justify-end items-center" style={{ gap: 'var(--sp-2)', marginTop: 'var(--sp-2)' }}>
+                      <button onClick={() => setEditingId(null)} className="flex items-center gap-1 text-[13px] px-3 py-1.5 rounded-lg tracking-cn transition-all hover:bg-[rgba(214,210,196,0.4)]" style={{ color: '#968C83' }}>
+                        <X size={14} /> 取消
+                      </button>
+                      <button onClick={() => saveEdit(comment.id)} className="btn btn-primary tracking-cn" style={{ padding: '6px 14px', borderRadius: 10, fontSize: 13 }}>
+                        <Check size={14} /> 保存
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p
+                    className="text-[14px] tracking-cn"
+                    style={{ color: '#6D635B', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                   >
-                    <Trash2 size={13} />
-                  </button>
+                    {comment.content}
+                  </p>
                 )}
               </div>
-              {/* 内容 — 保留换行 */}
-              <p
-                className="text-[14px] tracking-cn"
-                style={{ color: '#6D635B', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-              >
-                {comment.content}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -160,7 +255,8 @@ export default function CommentSection({
             style={{ backgroundColor: 'rgba(255,255,255,0.75)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43', borderRadius: 14, padding: '12px 16px', fontSize: 14, lineHeight: 1.8 }}
           />
 
-          <div className="flex justify-end" style={{ marginTop: 'var(--sp-4)' }}>
+          <div className="flex items-center justify-between" style={{ marginTop: 'var(--sp-4)' }}>
+            <span className="text-[12px] tracking-cn" style={{ color: '#C4B4A2' }}>发布后可自行编辑或删除</span>
             <button
               type="submit"
               disabled={loading || !name.trim() || !content.trim()}

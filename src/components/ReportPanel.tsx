@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar as CalIcon, Tag, Edit3, Trash2, Share2, X, Save, Bold, Italic, List, Hash, FileX } from 'lucide-react';
+import { Calendar as CalIcon, Tag, Edit3, Trash2, Share2, X, Save, Bold, List, Hash, FileX, ThumbsUp, Flower2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import CommentSection from './CommentSection';
@@ -14,9 +14,23 @@ interface ReportPanelProps {
 }
 
 const fmtCN = (s: string) => {
-  const d = new Date(s);
-  return `${d.getMonth() + 1}月${d.getDate()}日`;
+  const [y, m, d] = s.split('-').map(Number);
+  void y;
+  return `${m}月${d}日`;
 };
+
+// 新周记固定模板（含加粗标题 + 分点）
+const REPORT_TEMPLATE = `**本周完成**
+- 
+
+**下周计划**
+- 
+
+**遇到的问题**
+- 
+
+**需要支持**
+- `;
 
 export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, onClose, onChanged }: ReportPanelProps) {
   const { user, openLoginModal, showToast } = useAuth();
@@ -50,7 +64,7 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
       } else {
         setReport(null);
         setTitle('');
-        setContent('');
+        setContent(REPORT_TEMPLATE);
         setTags('');
         setCommentEnabled(true);
         // 无周报：作者直接进入新建态，访客只看空状态
@@ -66,6 +80,35 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
   const startEdit = () => {
     if (!user) { openLoginModal(() => setEditing(true)); return; }
     setEditing(true);
+  };
+
+  // ---- 点赞 / 送花（用 localStorage 记录本浏览器是否已操作，避免重复）----
+  const reactKey = (type: 'like' | 'flower') => `react_${type}_${reportId}`;
+  const [reacted, setReacted] = useState<{ like: boolean; flower: boolean }>({ like: false, flower: false });
+
+  useEffect(() => {
+    if (reportId) {
+      setReacted({
+        like: localStorage.getItem(reactKey('like')) === '1',
+        flower: localStorage.getItem(reactKey('flower')) === '1',
+      });
+    }
+  }, [reportId]);
+
+  const handleReact = async (type: 'like' | 'flower') => {
+    if (!reportId) return;
+    const already = reacted[type];
+    const delta = already ? -1 : 1;
+    try {
+      const res = await apiRequest('POST', `/reports/${reportId}/react`, { type, delta });
+      const field = type === 'flower' ? 'flowers' : 'likes';
+      setReport((r: any) => ({ ...r, [field]: (res as any)[field] }));
+      setReacted((s) => ({ ...s, [type]: !already }));
+      if (already) localStorage.removeItem(reactKey(type));
+      else localStorage.setItem(reactKey(type), '1');
+    } catch (e: any) {
+      showToast(e.message || '操作失败', 'error');
+    }
   };
 
   const handleSave = async () => {
@@ -193,20 +236,22 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
           <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-2)' }}>
             <label style={{ ...labelStyle, marginBottom: 0 }}>正文</label>
             <div className="flex items-center gap-1">
-              <button onClick={() => insertMarkdown('**')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="加粗"><Bold size={15} /></button>
-              <button onClick={() => insertMarkdown('*')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="斜体"><Italic size={15} /></button>
-              <button onClick={() => insertMarkdown('- ')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="列表"><List size={15} /></button>
+              <button onClick={() => insertMarkdown('**')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="加粗 **文字**"><Bold size={15} /></button>
+              <button onClick={() => insertMarkdown('- ')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="分点 - 列表"><List size={15} /></button>
             </div>
           </div>
           <textarea
             id="panel-content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={'本周完成：\n\n下周计划：\n\n遇到的问题：\n\n需要支持：'}
-            rows={12}
+            placeholder={REPORT_TEMPLATE}
+            rows={14}
             className="input-soft w-full outline-none resize-none tracking-cn"
             style={{ ...inputStyle, padding: '16px', borderRadius: 16, fontSize: 15, lineHeight: 2 }}
           />
+          <p className="text-[12px] tracking-cn" style={{ color: '#B6ADA3', marginTop: 'var(--sp-2)' }}>
+            小提示：<strong style={{ color: '#968C83' }}>**文字**</strong> 显示为加粗，行首 <strong style={{ color: '#968C83' }}>-</strong> 显示为分点
+          </p>
         </div>
 
         <div className="flex items-center justify-between" style={{ paddingTop: 'var(--sp-2)' }}>
@@ -257,18 +302,26 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
   return (
     <div className="expand-in stack-5">
       <article className="glass-strong rounded-[28px]" style={{ padding: 'var(--sp-6)' }}>
-        {/* 顶部：日期 + 操作 */}
-        <div className="flex items-start justify-between" style={{ marginBottom: 'var(--sp-4)' }}>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13.5px] font-bold tracking-cn" style={{ background: 'rgba(247,218,217,0.85)', color: '#B27A75' }}>
-              <CalIcon size={14} />
-              {fmtCN(report.week_start)} – {fmtCN(report.week_end)}
-            </span>
-            {tagList.map((t) => (
-              <span key={t} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] tracking-cn" style={{ background: 'rgba(214,210,196,0.8)', color: '#968C83' }}>
-                <Tag size={10} />{t}
+        {/* 顶部：日期/标签（分行）+ 操作 */}
+        <div className="flex items-start justify-between" style={{ marginBottom: 'var(--sp-5)' }}>
+          <div style={{ minWidth: 0 }}>
+            {/* 日期 — 与正文同字号(15px) 加粗 */}
+            <div className="flex items-center gap-2" style={{ marginBottom: 'var(--sp-3)' }}>
+              <CalIcon size={16} style={{ color: '#B27A75' }} />
+              <span className="text-[15px] font-bold tracking-cn" style={{ color: '#B27A75' }}>
+                {fmtCN(report.week_start)} – {fmtCN(report.week_end)}
               </span>
-            ))}
+            </div>
+            {/* 标签 — 独立一行，与正文同字号(15px) 加粗 */}
+            {tagList.length > 0 && (
+              <div className="flex flex-wrap items-center" style={{ gap: 'var(--sp-2)' }}>
+                {tagList.map((t) => (
+                  <span key={t} className="flex items-center gap-1 px-3 py-1 rounded-lg text-[15px] font-bold tracking-cn" style={{ background: 'rgba(214,210,196,0.6)', color: '#7D736A' }}>
+                    <Tag size={13} />{t}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-0.5 flex-shrink-0">
             <button onClick={handleShare} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="分享">
@@ -297,6 +350,38 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
         <div className="rounded-full" style={{ width: 48, height: 4, marginBottom: 'var(--sp-5)', background: 'linear-gradient(90deg, #E6B6B2, #FCEAE9)' }} />
 
         <div className="prose-art" dangerouslySetInnerHTML={{ __html: renderContent(report.content) }} />
+
+        {/* 点赞 / 送花 */}
+        <div className="flex items-center" style={{ gap: 'var(--sp-3)', marginTop: 'var(--sp-6)', paddingTop: 'var(--sp-5)', borderTop: '1px solid rgba(214,210,196,0.6)' }}>
+          <button
+            onClick={() => handleReact('like')}
+            className="flex items-center transition-all"
+            style={{
+              gap: 7, padding: '8px 16px', borderRadius: 999, fontSize: 14, fontWeight: 600,
+              cursor: 'pointer',
+              border: reacted.like ? '1.5px solid #E6B6B2' : '1.5px solid rgba(214,210,196,0.9)',
+              background: reacted.like ? 'rgba(247,218,217,0.6)' : 'rgba(255,255,255,0.5)',
+              color: reacted.like ? '#B27A75' : '#968C83',
+            }}
+          >
+            <ThumbsUp size={15} fill={reacted.like ? '#C98D88' : 'none'} />
+            赞 {report.likes ? report.likes : ''}
+          </button>
+          <button
+            onClick={() => handleReact('flower')}
+            className="flex items-center transition-all"
+            style={{
+              gap: 7, padding: '8px 16px', borderRadius: 999, fontSize: 14, fontWeight: 600,
+              cursor: 'pointer',
+              border: reacted.flower ? '1.5px solid #E6B6B2' : '1.5px solid rgba(214,210,196,0.9)',
+              background: reacted.flower ? 'rgba(247,218,217,0.6)' : 'rgba(255,255,255,0.5)',
+              color: reacted.flower ? '#B27A75' : '#968C83',
+            }}
+          >
+            <Flower2 size={15} fill={reacted.flower ? '#F7DAD9' : 'none'} />
+            送花 {report.flowers ? report.flowers : ''}
+          </button>
+        </div>
       </article>
 
       <div className="glass rounded-[28px]" style={{ padding: 'var(--sp-6)' }}>
