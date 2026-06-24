@@ -15,8 +15,14 @@ interface Report {
 }
 
 // 给定任意日期，返回所在周的周一/周五（yyyy-mm-dd）
+// 本地时区解析 yyyy-mm-dd（避免 new Date('2026-06-26') 被按 UTC 解析导致跨天偏移）
+function parseLocalDate(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function weekRangeOf(dateStr: string) {
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
   const dow = (d.getDay() + 6) % 7; // 周一=0
   const monday = new Date(d);
   monday.setDate(d.getDate() - dow);
@@ -60,40 +66,31 @@ export default function Dashboard() {
   };
 
   const reportForDate = (dateStr: string): Report | null => {
-    const date = new Date(dateStr);
+    const date = parseLocalDate(dateStr);
     return reports.find((r) => {
-      const rd = new Date(r.week_start);
+      const rd = parseLocalDate(r.week_start);
       const re = new Date(rd);
       re.setDate(rd.getDate() + 4);
-      return date >= new Date(rd.getFullYear(), rd.getMonth(), rd.getDate()) &&
-             date <= new Date(re.getFullYear(), re.getMonth(), re.getDate());
+      return date >= rd && date <= re;
     }) || null;
   };
 
-  // 本月出勤统计
+  // 本月出勤统计：本月内、有对应周报的工作日数量
   const attendance = useMemo(() => {
     const y = currentDate.getFullYear();
     const m = currentDate.getMonth();
     const last = new Date(y, m + 1, 0).getDate();
     let total = 0;
-    const weeksDone = new Set<string>();
+    let done = 0;
     for (let d = 1; d <= last; d++) {
-      const dt = new Date(y, m, d);
-      const dow = dt.getDay();
+      const dow = new Date(y, m, d).getDay();
       if (dow >= 1 && dow <= 5) {
         total++;
         const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const r = reportForDate(ds);
-        if (r) {
-          const dt2 = new Date(ds);
-          const off = (dt2.getDay() + 6) % 7;
-          const mon = new Date(dt2); mon.setDate(dt2.getDate() - off);
-          // 该工作日有对应周报 → 计入出勤
-          weeksDone.add(ds);
-        }
+        if (reportForDate(ds)) done++;
       }
     }
-    return { done: weeksDone.size, total };
+    return { done, total };
   }, [currentDate, reports]);
 
   const handleDayClick = (dateStr: string) => {

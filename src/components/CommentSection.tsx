@@ -11,20 +11,6 @@ interface Comment {
   created_at: string;
 }
 
-const AVATAR_COLORS = [
-  ['#F7DAD9', '#B27A75'],
-  ['#F0CFC6', '#A86E68'],
-  ['#E4DFD2', '#7D736A'],
-  ['#EDE3D8', '#8A7E72'],
-  ['#FBE2DD', '#B27A75'],
-];
-
-function avatarColor(name: string) {
-  let sum = 0;
-  for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
-  return AVATAR_COLORS[sum % AVATAR_COLORS.length];
-}
-
 export default function CommentSection({
   reportId,
   commentEnabled,
@@ -87,76 +73,112 @@ export default function CommentSection({
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-5">
-        <MessageCircle size={18} style={{ color: '#D49994' }} />
-        <h2 className="font-serif-art text-[18px] font-bold" style={{ color: '#514A43' }}>跟帖评论</h2>
-        <span className="text-[13px]" style={{ color: '#B6ADA3' }}>{comments.length}</span>
+      {/* 标题 */}
+      <div className="flex items-center gap-2" style={{ marginBottom: 'var(--sp-5)' }}>
+        <MessageCircle size={18} style={{ color: '#C98D88' }} />
+        <h2 className="font-serif-art text-[18px] font-bold tracking-cn" style={{ color: '#514A43' }}>跟帖评论</h2>
+        <span className="text-[13px] tracking-cn" style={{ color: '#B6ADA3' }}>{comments.length}</span>
       </div>
 
+      {/* 评论列表 */}
       {comments.length === 0 ? (
-        <p className="text-[14px] text-center py-6" style={{ color: '#B6ADA3' }}>还没有评论，来留下第一条吧</p>
+        <p className="text-[14px] text-center tracking-cn" style={{ color: '#B6ADA3', padding: 'var(--sp-6) 0' }}>
+          还没有评论，来留下第一条吧
+        </p>
       ) : (
-        <div className="space-y-5 mb-6">
-          {comments.map((comment) => {
-            const [bg, fg] = avatarColor(comment.author_name);
-            return (
-              <div key={comment.id} className="flex gap-3.5">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[14px] font-bold" style={{ backgroundColor: bg, color: fg }}>
-                  {comment.author_name.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[14px] font-semibold" style={{ color: '#514A43' }}>{comment.author_name}</span>
-                    <span className="text-[12px]" style={{ color: '#B6ADA3' }}>{formatDate(comment.created_at)}</span>
-                    {isAuthor && (
-                      <button onClick={() => handleDelete(comment.id)} className="ml-auto p-1 rounded transition-all hover:bg-[rgba(251,238,234,0.9)]" style={{ color: '#B6ADA3' }}>
-                        <Trash2 size={13} />
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-[14px] leading-relaxed" style={{ color: '#6D635B' }}>{comment.content}</p>
-                </div>
+        <div className="stack-4">
+          {comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="rounded-[18px]"
+              style={{ background: 'rgba(255, 250, 243, 0.6)', border: '1px solid rgba(214, 210, 196, 0.55)', padding: 'var(--sp-4) var(--sp-5)' }}
+            >
+              {/* 名字 + 时间 + 删除 */}
+              <div className="flex items-center" style={{ gap: 'var(--sp-3)', marginBottom: 'var(--sp-2)' }}>
+                <span className="text-[15px] font-bold tracking-cn" style={{ color: '#514A43' }}>
+                  {comment.author_name}
+                </span>
+                <span className="text-[12px] tracking-cn" style={{ color: '#B6ADA3' }}>
+                  {formatDate(comment.created_at)}
+                </span>
+                {isAuthor && (
+                  <button
+                    onClick={() => handleDelete(comment.id)}
+                    className="ml-auto p-1 rounded-lg transition-all hover:bg-[rgba(251,238,234,0.9)]"
+                    style={{ color: '#C4B4A2' }}
+                    title="删除评论"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
               </div>
-            );
-          })}
+              {/* 内容 — 保留换行 */}
+              <p
+                className="text-[14px] tracking-cn"
+                style={{ color: '#6D635B', lineHeight: 1.8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+              >
+                {comment.content}
+              </p>
+            </div>
+          ))}
         </div>
       )}
 
+      {/* 发表评论 — 整体一个大框架，与列表保持距离 */}
       {commentEnabled ? (
-        <form onSubmit={handleSubmit} className="pt-5" style={{ borderTop: '1px solid rgba(214,210,196,0.8)' }}>
-          <div className="flex flex-col gap-3">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="你的名字（无需登录）"
-              maxLength={20}
-              className="input-soft w-full sm:w-52 px-4 py-2.5 rounded-2xl text-[14px] outline-none"
-              style={{ backgroundColor: 'rgba(255,255,255,0.6)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43' }}
-            />
-            <div className="relative">
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="写下你的想法、建议或鼓励…"
-                maxLength={1000}
-                rows={3}
-                className="input-soft w-full px-4 py-3 pr-12 rounded-2xl text-[14px] outline-none resize-none leading-relaxed"
-                style={{ backgroundColor: 'rgba(255,255,255,0.6)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43' }}
-              />
-              <button
-                type="submit"
-                disabled={loading || !name.trim() || !content.trim()}
-                className="absolute right-3 bottom-3 p-2 rounded-xl text-white disabled:opacity-30 transition-all"
-                style={{ background: 'linear-gradient(135deg, #D49994 0%, #B27A75 100%)' }}
-              >
-                <Send size={15} />
-              </button>
-            </div>
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-[20px]"
+          style={{
+            marginTop: 'var(--sp-8)',
+            padding: 'var(--sp-5)',
+            background: 'rgba(247, 218, 217, 0.18)',
+            border: '1px solid rgba(214, 210, 196, 0.6)',
+          }}
+        >
+          <p className="text-[13px] font-semibold tracking-cn" style={{ color: '#968C83', marginBottom: 'var(--sp-3)' }}>
+            发表评论
+          </p>
+
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="你的名字（无需登录）"
+            maxLength={20}
+            className="input-soft w-full outline-none tracking-cn"
+            style={{ backgroundColor: 'rgba(255,255,255,0.75)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43', borderRadius: 14, padding: '11px 16px', fontSize: 14, marginBottom: 'var(--sp-3)' }}
+          />
+
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="写下你的想法、建议或鼓励…（支持换行）"
+            maxLength={1000}
+            rows={4}
+            className="input-soft w-full outline-none resize-none tracking-cn"
+            style={{ backgroundColor: 'rgba(255,255,255,0.75)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43', borderRadius: 14, padding: '12px 16px', fontSize: 14, lineHeight: 1.8 }}
+          />
+
+          <div className="flex justify-end" style={{ marginTop: 'var(--sp-4)' }}>
+            <button
+              type="submit"
+              disabled={loading || !name.trim() || !content.trim()}
+              className="btn btn-primary tracking-cn disabled:opacity-40"
+              style={{ padding: '10px 22px', borderRadius: 14, fontSize: 14 }}
+            >
+              <Send size={15} />
+              {loading ? '发布中…' : '发布评论'}
+            </button>
           </div>
         </form>
       ) : (
-        <p className="text-[14px] text-center py-4" style={{ color: '#B6ADA3', borderTop: '1px solid rgba(214,210,196,0.8)' }}>该周记已关闭评论</p>
+        <p
+          className="text-[14px] text-center tracking-cn"
+          style={{ color: '#B6ADA3', marginTop: 'var(--sp-6)', paddingTop: 'var(--sp-5)', borderTop: '1px solid rgba(214,210,196,0.7)' }}
+        >
+          该周记已关闭评论
+        </p>
       )}
     </div>
   );

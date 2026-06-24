@@ -51,11 +51,11 @@ export default function Calendar({
   const reportForDay = (day: number) => {
     const date = new Date(year, month, day);
     return reports.find((r) => {
-      const rd = new Date(r.week_start);
-      const re = new Date(rd);
-      re.setDate(rd.getDate() + 4);
-      return date >= new Date(rd.getFullYear(), rd.getMonth(), rd.getDate()) &&
-             date <= new Date(re.getFullYear(), re.getMonth(), re.getDate());
+      const [ry, rm, rd] = r.week_start.split('-').map(Number);
+      const start = new Date(ry, rm - 1, rd);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 4);
+      return date >= start && date <= end;
     });
   };
 
@@ -67,7 +67,8 @@ export default function Calendar({
   // 选中日期所在的周（周一到周五）高亮
   const selectedWeekDays = (() => {
     if (!selectedDate) return new Set<number>();
-    const sd = new Date(selectedDate);
+    const [sy, sm, sd2] = selectedDate.split('-').map(Number);
+    const sd = new Date(sy, sm - 1, sd2);
     const dow = (sd.getDay() + 6) % 7;
     const monday = new Date(sd);
     monday.setDate(sd.getDate() - dow);
@@ -121,7 +122,7 @@ export default function Calendar({
           const hasReport = !!report;
           const today = isToday(day);
           const inSelectedWeek = selectedWeekDays.has(day);
-          const isSelected = selectedDate ? new Date(selectedDate).getDate() === day && new Date(selectedDate).getMonth() === month : false;
+          const isSelected = selectedDate ? (() => { const [, sm, sdd] = selectedDate.split('-').map(Number); return sdd === day && sm - 1 === month; })() : false;
 
           let bg = 'transparent';
           if (weekday) bg = hasReport ? 'rgba(247, 218, 217, 0.45)' : 'rgba(214, 210, 196, 0.28)';
