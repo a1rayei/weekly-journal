@@ -6,11 +6,26 @@ import { apiRequest } from '../lib/api';
 interface SidebarProps {
   reportCount: number;
   attendance: { done: number; total: number };
+  streakWeeks: number;
   monthKey: string; // yyyy-mm，用于本月目标存储
   onNewReport: () => void;
 }
 
-export default function Sidebar({ reportCount, attendance, monthKey, onNewReport }: SidebarProps) {
+// 统一的卡片头部：小圆角方块图标 + 标题（以「本月目标」样式为准）
+function CardHead({ icon, title, right }: { icon: React.ReactNode; title: string; right?: React.ReactNode }) {
+  return (
+    <div className="flex items-center" style={{ gap: 'var(--sp-2)', marginBottom: 'var(--sp-3)' }}>
+      <div className="rounded-[10px] flex items-center justify-center flex-shrink-0"
+        style={{ width: 28, height: 28, background: 'rgba(201, 141, 136, 0.16)' }}>
+        {icon}
+      </div>
+      <span className="text-[13px] font-semibold tracking-cn flex-1" style={{ color: '#7D736A' }}>{title}</span>
+      {right}
+    </div>
+  );
+}
+
+export default function Sidebar({ reportCount, attendance, streakWeeks, monthKey, onNewReport }: SidebarProps) {
   const { user, logout, openLoginModal, showToast } = useAuth();
 
   const [goal, setGoal] = useState('');
@@ -29,7 +44,6 @@ export default function Sidebar({ reportCount, attendance, monthKey, onNewReport
   }, [goalSettingKey]);
 
   const startEditGoal = () => {
-    if (!user) { openLoginModal(() => { setGoalDraft(goal); setEditingGoal(true); }); return; }
     setGoalDraft(goal);
     setEditingGoal(true);
   };
@@ -47,6 +61,8 @@ export default function Sidebar({ reportCount, attendance, monthKey, onNewReport
       setSavingGoal(false);
     }
   };
+
+  const cardStyle = (bg: string) => ({ background: bg, padding: 'var(--sp-4) var(--sp-5)', borderRadius: 16 });
 
   return (
     <aside className="glass rounded-[28px] fade-up" style={{ alignSelf: 'start', padding: 'var(--sp-6)' }}>
@@ -81,45 +97,35 @@ export default function Sidebar({ reportCount, attendance, monthKey, onNewReport
       {/* 分隔 */}
       <div style={{ height: 1, background: 'rgba(214, 210, 196, 0.7)', margin: 'var(--sp-6) 0' }} />
 
-      {/* 统计 */}
+      {/* 统计卡片 —— 三张卡格式统一 */}
       <div className="stack-3">
-        <div className="flex items-center rounded-[16px]"
-          style={{ background: 'rgba(247, 218, 217, 0.3)', padding: 'var(--sp-4)', gap: 'var(--sp-3)' }}>
-          <div className="rounded-[12px] flex items-center justify-center flex-shrink-0"
-            style={{ width: 40, height: 40, background: 'rgba(201, 141, 136, 0.16)' }}>
-            <BookMarked size={18} style={{ color: '#C98D88' }} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[12px] tracking-cn" style={{ color: '#968C83', marginBottom: 2 }}>累计周记</p>
-            <p className="font-serif-art font-bold" style={{ color: '#B27A75', fontSize: 21, lineHeight: 1.2 }}>
-              {reportCount}<span className="text-[13px] font-normal" style={{ color: '#B6ADA3', marginLeft: 3 }}>篇</span>
-            </p>
-          </div>
+        {/* 累计周记 */}
+        <div style={cardStyle('rgba(247, 218, 217, 0.3)')}>
+          <CardHead icon={<BookMarked size={15} style={{ color: '#C98D88' }} />} title="累计周记" />
+          <p className="font-serif-art font-bold" style={{ color: '#B27A75', fontSize: 22, lineHeight: 1.2 }}>
+            {reportCount}<span className="text-[13px] font-normal" style={{ color: '#B6ADA3', marginLeft: 4 }}>篇</span>
+          </p>
         </div>
 
-        <div className="flex items-center rounded-[16px]"
-          style={{ background: 'rgba(214, 210, 196, 0.28)', padding: 'var(--sp-4)', gap: 'var(--sp-3)' }}>
-          <div className="rounded-[12px] flex items-center justify-center flex-shrink-0"
-            style={{ width: 40, height: 40, background: 'rgba(150, 140, 131, 0.16)' }}>
-            <CalendarCheck size={18} style={{ color: '#968C83' }} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[12px] tracking-cn" style={{ color: '#968C83', marginBottom: 2 }}>本月出勤</p>
-            <p className="font-serif-art font-bold" style={{ color: '#7D736A', fontSize: 21, lineHeight: 1.2 }}>
-              {attendance.done}<span className="text-[13px] font-normal" style={{ color: '#B6ADA3', marginLeft: 3 }}>/ {attendance.total} 天</span>
+        {/* 本月出勤（含已坚持周数小字） */}
+        <div style={cardStyle('rgba(247, 218, 217, 0.3)')}>
+          <CardHead icon={<CalendarCheck size={15} style={{ color: '#C98D88' }} />} title="本月出勤" />
+          <p className="font-serif-art font-bold" style={{ color: '#B27A75', fontSize: 22, lineHeight: 1.2 }}>
+            {attendance.done}<span className="text-[13px] font-normal" style={{ color: '#B6ADA3', marginLeft: 4 }}>/ {attendance.total} 天</span>
+          </p>
+          {streakWeeks > 0 && (
+            <p className="text-[12px] tracking-cn" style={{ color: '#B6ADA3', marginTop: 6 }}>
+              已坚持记录 <span style={{ color: '#C98D88', fontWeight: 600 }}>{streakWeeks}</span> 周
             </p>
-          </div>
+          )}
         </div>
 
         {/* 本月目标 */}
-        <div className="rounded-[16px]" style={{ background: 'rgba(247, 218, 217, 0.22)', padding: 'var(--sp-4)' }}>
-          <div className="flex items-center" style={{ gap: 'var(--sp-2)', marginBottom: 'var(--sp-2)' }}>
-            <div className="rounded-[10px] flex items-center justify-center flex-shrink-0"
-              style={{ width: 26, height: 26, background: 'rgba(201, 141, 136, 0.16)' }}>
-              <Target size={14} style={{ color: '#C98D88' }} />
-            </div>
-            <span className="text-[12px] tracking-cn flex-1" style={{ color: '#968C83' }}>本月目标</span>
-            {!editingGoal && (
+        <div style={cardStyle('rgba(247, 218, 217, 0.3)')}>
+          <CardHead
+            icon={<Target size={15} style={{ color: '#C98D88' }} />}
+            title="本月目标"
+            right={user && !editingGoal ? (
               <button
                 onClick={startEditGoal}
                 className="p-1 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]"
@@ -128,8 +134,8 @@ export default function Sidebar({ reportCount, attendance, monthKey, onNewReport
               >
                 <Pencil size={13} />
               </button>
-            )}
-          </div>
+            ) : undefined}
+          />
 
           {editingGoal ? (
             <div>
@@ -153,13 +159,15 @@ export default function Sidebar({ reportCount, attendance, monthKey, onNewReport
               </div>
             </div>
           ) : goal ? (
-            <p className="text-[13px] tracking-cn" style={{ color: '#6D635B', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            <p className="text-[14px] tracking-cn" style={{ color: '#6D635B', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
               {goal}
             </p>
-          ) : (
-            <button onClick={startEditGoal} className="text-[12.5px] tracking-cn transition-all hover:opacity-70" style={{ color: '#B6ADA3' }}>
+          ) : user ? (
+            <button onClick={startEditGoal} className="text-[13px] tracking-cn transition-all hover:opacity-70" style={{ color: '#B6ADA3' }}>
               + 点此设定本月目标
             </button>
+          ) : (
+            <p className="text-[13px] tracking-cn" style={{ color: '#B6ADA3' }}>暂未设定</p>
           )}
         </div>
       </div>

@@ -93,6 +93,27 @@ export default function Dashboard() {
     return { done, total };
   }, [currentDate, reports]);
 
+  // 连续坚持周数：从本周往前数，连续每周都有周报的周数
+  const streakWeeks = useMemo(() => {
+    if (reports.length === 0) return 0;
+    const hasWeek = new Set(reports.map((r) => r.week_start));
+    // 本周周一
+    const today = new Date();
+    const dow = (today.getDay() + 6) % 7;
+    const mon = new Date(today);
+    mon.setDate(today.getDate() - dow);
+    const fmt = (x: Date) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+    let count = 0;
+    const cursor = new Date(mon);
+    // 若本周还没写，从上一周开始计数
+    if (!hasWeek.has(fmt(cursor))) cursor.setDate(cursor.getDate() - 7);
+    while (hasWeek.has(fmt(cursor))) {
+      count++;
+      cursor.setDate(cursor.getDate() - 7);
+    }
+    return count;
+  }, [reports]);
+
   const handleDayClick = (dateStr: string) => {
     setForceEdit(false);
     setSelectedDate(dateStr);
@@ -131,6 +152,7 @@ export default function Dashboard() {
         <Sidebar
           reportCount={reports.length}
           attendance={attendance}
+          streakWeeks={streakWeeks}
           monthKey={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`}
           onNewReport={handleNewReport}
         />
