@@ -155,7 +155,7 @@ export default function Dashboard() {
 
           {panelOpen && selectedRange && (
             <ReportPanel
-              key={`${selectedRange.weekStart}-${selectedReport?.id || 'new'}`}
+              key={`${selectedRange.weekStart}-${selectedReport?.id || 'new'}-${forceEdit ? 'edit' : 'view'}`}
               weekStart={selectedRange.weekStart}
               weekEnd={selectedRange.weekEnd}
               reportId={selectedReport?.id || null}

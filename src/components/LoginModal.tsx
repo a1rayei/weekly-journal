@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Lock, Mail, X, PenLine } from 'lucide-react';
 
@@ -26,86 +27,91 @@ export default function LoginModal() {
     }
   };
 
-  return (
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: '#FFFAF3',
+    border: '1.5px solid #D6D2C4',
+    color: '#514A43',
+  };
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center p-4 modal-backdrop"
-      style={{ backgroundColor: 'rgba(60, 47, 47, 0.28)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+      className="modal-backdrop"
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 16,
+        backgroundColor: 'rgba(81, 74, 67, 0.3)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+      }}
       onClick={closeLoginModal}
     >
       <div
-        className="w-full max-w-[380px] rounded-[28px] p-8 modal-content relative"
-        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 24px 60px rgba(120, 90, 60, 0.22)' }}
+        className="modal-content relative"
+        style={{
+          width: '100%', maxWidth: 400, borderRadius: 28,
+          padding: '40px 36px',
+          background: 'rgba(255,255,255,0.9)',
+          backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255,255,255,0.8)',
+          boxShadow: '0 24px 60px rgba(150, 140, 131, 0.22)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={closeLoginModal}
-          className="absolute right-5 top-5 p-1.5 rounded-full hover:bg-[#FFF5EA] transition-colors"
-          style={{ color: '#B6ADA3' }}
+          className="absolute rounded-full transition-colors"
+          style={{ right: 18, top: 18, padding: 7, color: '#B6ADA3' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = '#FFF5EA')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           <X size={18} />
         </button>
 
-        <div className="text-center mb-7">
+        <div className="text-center" style={{ marginBottom: 32 }}>
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'linear-gradient(135deg, #F7DAD9 0%, #EFC3C0 100%)' }}
+            className="flex items-center justify-center mx-auto"
+            style={{ width: 60, height: 60, borderRadius: 18, marginBottom: 18, background: 'linear-gradient(135deg, #F7DAD9 0%, #EFC3C0 100%)' }}
           >
             <PenLine size={26} style={{ color: '#B27A75' }} />
           </div>
-          <h2 className="text-[22px] font-bold mb-1.5" style={{ color: '#514A43', letterSpacing: '-0.02em' }}>
+          <h2 className="font-serif-art font-bold tracking-cn-tight" style={{ color: '#514A43', fontSize: 23, lineHeight: 1.3, marginBottom: 8 }}>
             作者登录
           </h2>
-          <p className="text-[13px]" style={{ color: '#968C83' }}>
-            创建或编辑周报需要验证身份
+          <p className="text-[13px] tracking-cn" style={{ color: '#968C83', lineHeight: 1.6 }}>
+            创建或编辑周记需要验证身份
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <div className="relative">
-              <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#B6ADA3' }} />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="邮箱地址"
-                autoFocus
-                className="w-full pl-11 pr-3.5 py-3 rounded-xl text-sm outline-none transition-all"
-                style={{
-                  backgroundColor: '#FFFAF3',
-                  border: '1.5px solid #D6D2C4',
-                  color: '#514A43',
-                }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#E6B6B2')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#D6D2C4')}
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="stack-4">
+          <div className="relative">
+            <Mail size={17} className="absolute top-1/2 -translate-y-1/2" style={{ left: 15, color: '#B6ADA3' }} />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="邮箱地址"
+              autoFocus
+              className="input-soft w-full outline-none tracking-cn"
+              style={{ ...inputStyle, padding: '13px 16px 13px 44px', borderRadius: 14, fontSize: 14 }}
+              required
+            />
           </div>
 
-          <div>
-            <div className="relative">
-              <Lock size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#B6ADA3' }} />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="密码"
-                className="w-full pl-11 pr-3.5 py-3 rounded-xl text-sm outline-none transition-all"
-                style={{
-                  backgroundColor: '#FFFAF3',
-                  border: '1.5px solid #D6D2C4',
-                  color: '#514A43',
-                }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#E6B6B2')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#D6D2C4')}
-                required
-              />
-            </div>
+          <div className="relative">
+            <Lock size={17} className="absolute top-1/2 -translate-y-1/2" style={{ left: 15, color: '#B6ADA3' }} />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="密码"
+              className="input-soft w-full outline-none tracking-cn"
+              style={{ ...inputStyle, padding: '13px 16px 13px 44px', borderRadius: 14, fontSize: 14 }}
+              required
+            />
           </div>
 
           {error && (
-            <div className="text-[13px] px-3.5 py-2.5 rounded-xl" style={{ color: '#C0563E', backgroundColor: '#FBEEEA' }}>
+            <div className="text-[13px] tracking-cn" style={{ color: '#C0563E', backgroundColor: '#FBEEEA', padding: '11px 16px', borderRadius: 14 }}>
               {error}
             </div>
           )}
@@ -114,16 +120,13 @@ export default function LoginModal() {
             type="submit"
             disabled={loading}
             className="btn btn-primary w-full tracking-cn disabled:opacity-60"
-            style={{ padding: '12px 0', borderRadius: 14, fontSize: 14 }}
+            style={{ padding: '13px 0', borderRadius: 14, fontSize: 14.5, marginTop: 4 }}
           >
-            {loading ? '登录中...' : '登 录'}
+            {loading ? '登录中…' : '登 录'}
           </button>
         </form>
-
-        <p className="mt-5 text-[12px] text-center" style={{ color: '#B6ADA3' }}>
-          演示账号 admin@weekly.local / admin123
-        </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -151,9 +151,10 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
 
   // ===== 编辑/新建态 =====
   if (editing) {
+    const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12.5, fontWeight: 600, color: '#968C83', marginBottom: 'var(--sp-2)', letterSpacing: '-0.01em' };
     return (
-      <div className="glass-strong rounded-[28px] expand-in" style={{ padding: 'var(--sp-6)' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-5)' }}>
+      <div className="glass-strong rounded-[28px] expand-in" style={{ padding: 'var(--sp-8)' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-6)' }}>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(247,218,217,0.7)' }}>
             <CalIcon size={14} style={{ color: '#B27A75' }} />
             <span className="text-[13px] font-bold tracking-cn" style={{ color: '#B27A75' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</span>
@@ -163,49 +164,59 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
           </button>
         </div>
 
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="本周标题，例如：第 25 周 · 项目攻坚周"
-          className="input-soft w-full px-4 py-3 rounded-2xl text-[18px] font-bold font-serif-art outline-none mb-4"
-          style={inputStyle}
-        />
-
-        <div className="relative mb-4">
-          <Hash size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#B6ADA3' }} />
+        <div style={{ marginBottom: 'var(--sp-5)' }}>
+          <label style={labelStyle}>标题</label>
           <input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="标签，逗号分隔（如：项目A, 复盘）"
-            className="input-soft w-full pl-9 pr-4 py-2.5 rounded-2xl text-[14px] outline-none"
-            style={inputStyle}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="本周标题，例如：第 25 周 · 项目攻坚周"
+            className="input-soft w-full font-bold font-serif-art outline-none tracking-cn-tight"
+            style={{ ...inputStyle, padding: '14px 16px', borderRadius: 16, fontSize: 18 }}
           />
         </div>
 
-        <div className="flex items-center gap-1 mb-2">
-          <button onClick={() => insertMarkdown('**')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="加粗"><Bold size={15} /></button>
-          <button onClick={() => insertMarkdown('*')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="斜体"><Italic size={15} /></button>
-          <button onClick={() => insertMarkdown('- ')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="列表"><List size={15} /></button>
+        <div style={{ marginBottom: 'var(--sp-5)' }}>
+          <label style={labelStyle}>标签</label>
+          <div className="relative">
+            <Hash size={15} className="absolute top-1/2 -translate-y-1/2" style={{ left: 14, color: '#B6ADA3' }} />
+            <input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="逗号分隔，如：项目A, 复盘"
+              className="input-soft w-full outline-none tracking-cn"
+              style={{ ...inputStyle, padding: '12px 16px 12px 38px', borderRadius: 16, fontSize: 14 }}
+            />
+          </div>
         </div>
 
-        <textarea
-          id="panel-content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder={'本周完成：\n\n下周计划：\n\n遇到的问题：\n\n需要支持：'}
-          rows={12}
-          className="input-soft w-full px-4 py-3.5 rounded-2xl text-[15px] outline-none resize-none mb-4"
-          style={{ ...inputStyle, lineHeight: 1.9 }}
-        />
+        <div style={{ marginBottom: 'var(--sp-5)' }}>
+          <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-2)' }}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>正文</label>
+            <div className="flex items-center gap-1">
+              <button onClick={() => insertMarkdown('**')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="加粗"><Bold size={15} /></button>
+              <button onClick={() => insertMarkdown('*')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="斜体"><Italic size={15} /></button>
+              <button onClick={() => insertMarkdown('- ')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="列表"><List size={15} /></button>
+            </div>
+          </div>
+          <textarea
+            id="panel-content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={'本周完成：\n\n下周计划：\n\n遇到的问题：\n\n需要支持：'}
+            rows={12}
+            className="input-soft w-full outline-none resize-none tracking-cn"
+            style={{ ...inputStyle, padding: '16px', borderRadius: 16, fontSize: 15, lineHeight: 2 }}
+          />
+        </div>
 
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-[13px] cursor-pointer" style={{ color: '#968C83' }}>
+        <div className="flex items-center justify-between" style={{ paddingTop: 'var(--sp-2)' }}>
+          <label className="flex items-center gap-2 text-[13px] cursor-pointer tracking-cn" style={{ color: '#968C83' }}>
             <input type="checkbox" checked={commentEnabled} onChange={(e) => setCommentEnabled(e.target.checked)} style={{ accentColor: '#C98D88' }} />
             允许跟帖评论
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {reportId && (
-              <button onClick={() => { setEditing(false); load(); }} className="btn btn-ghost tracking-cn" style={{ padding: '10px 18px', borderRadius: 14, fontSize: 14, fontWeight: 500 }}>
+              <button onClick={() => { setEditing(false); load(); }} className="btn btn-ghost tracking-cn" style={{ padding: '11px 20px', borderRadius: 14, fontSize: 14, fontWeight: 500 }}>
                 取消
               </button>
             )}
@@ -213,7 +224,7 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
               onClick={handleSave}
               disabled={saving}
               className="btn btn-primary tracking-cn disabled:opacity-50"
-              style={{ padding: '10px 24px', borderRadius: 14, fontSize: 14 }}
+              style={{ padding: '11px 26px', borderRadius: 14, fontSize: 14 }}
             >
               <Save size={16} />
               {saving ? '保存中…' : '发布'}
