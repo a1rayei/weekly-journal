@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #F7F3ED;
+  --paper: #FFFFFF;
+  --ink: #3A2E28;
+  --ink-soft: #6B5D54;
+  --muted: #A89684;
+  --faint: #C4B4A2;
+  --line: #ECE3D8;
+  --accent: #D98E5F;
+  --accent-deep: #B06B3E;
+  --accent-soft: #F6E5D6;
+  --accent-tint: #FBF3EC;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* 衬线字体用于标题，增添艺术感 */
+.font-serif-art {
+  font-family: 'Noto Serif SC', Georgia, serif;
+}
+
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #DDD0C2; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #C4B4A2; }
+
+/* ---------- 动效 ---------- */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, -16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-up { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.toast-enter { animation: toastIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.modal-content { animation: modalIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.modal-backdrop { animation: backdropIn 0.3s ease both; }
+
+/* 卡片悬浮 */
+.card-soft {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-soft:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(150, 110, 70, 0.10);
+  border-color: #E4D3C0 !important;
+}
+
+/* 正文排版 */
+.prose-art {
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--ink-soft);
+}
+.prose-art strong { color: var(--ink); font-weight: 600; }
+.prose-art em { color: var(--accent-deep); font-style: italic; }
+.prose-art li {
+  list-style: none;
+  position: relative;
+  padding-left: 1.3em;
+  margin-bottom: 0.4em;
+}
+.prose-art li::before {
+  content: '';
+  position: absolute;
+  left: 0.1em;
+  top: 0.75em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* 输入聚焦 */
+.input-soft {
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.input-soft:focus {
+  border-color: var(--accent) !important;
+  background-color: #fff !important;
+}
