@@ -129,19 +129,12 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0, 280px) minmax(0, 1fr)' }}>
+      <div className="dash-grid">
         {/* 左窄栏 */}
-        <div className="hidden md:block">
-          <Sidebar reportCount={reports.length} attendance={attendance} onNewReport={handleNewReport} />
-        </div>
-
-        {/* 移动端顶部精简信息 */}
-        <div className="md:hidden mb-1">
-          <Sidebar reportCount={reports.length} attendance={attendance} onNewReport={handleNewReport} />
-        </div>
+        <Sidebar reportCount={reports.length} attendance={attendance} onNewReport={handleNewReport} />
 
         {/* 右宽栏 */}
-        <main className="space-y-5">
+        <main className="space-y-5 min-w-0">
           <div className="glass rounded-[28px] p-6 sm:p-7 fade-up">
             <Calendar
               currentDate={currentDate}
@@ -154,7 +147,7 @@ export default function Dashboard() {
               onToday={() => setCurrentDate(new Date())}
             />
             {!panelOpen && loaded && (
-              <p className="text-[12.5px] text-center mt-5" style={{ color: '#B7A693' }}>
+              <p className="text-[12.5px] text-center mt-5" style={{ color: '#B6ADA3' }}>
                 点击任意工作日，查看或撰写当周周记
               </p>
             )}

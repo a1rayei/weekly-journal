@@ -87,17 +87,17 @@ export default function Calendar({
     <div>
       {/* 头部 */}
       <div className="flex items-center justify-between mb-5">
-        <h2 className="font-serif-art font-bold leading-none" style={{ color: '#3A2E28', fontSize: compact ? 20 : 26, letterSpacing: '-0.02em' }}>
+        <h2 className="font-serif-art font-bold leading-none" style={{ color: '#514A43', fontSize: compact ? 20 : 26, letterSpacing: '-0.02em' }}>
           {year} · {monthNames[month]}
         </h2>
         <div className="flex items-center gap-1">
-          <button onClick={onToday} className="px-3 py-1.5 text-[13px] rounded-xl transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }}>
+          <button onClick={onToday} className="px-3 py-1.5 text-[13px] rounded-xl transition-all hover:bg-[rgba(247,218,217,0.5)]" style={{ color: '#968C83' }}>
             今天
           </button>
-          <button onClick={onPrevMonth} className="p-2 rounded-xl transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }}>
+          <button onClick={onPrevMonth} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.5)]" style={{ color: '#968C83' }}>
             <ChevronLeft size={18} />
           </button>
-          <button onClick={onNextMonth} className="p-2 rounded-xl transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }}>
+          <button onClick={onNextMonth} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.5)]" style={{ color: '#968C83' }}>
             <ChevronRight size={18} />
           </button>
         </div>
@@ -106,7 +106,7 @@ export default function Calendar({
       {/* 星期 */}
       <div className="grid grid-cols-7 gap-1.5 mb-1.5">
         {weekLabels.map((w, i) => (
-          <div key={w} className="text-center text-[12px] font-medium py-1" style={{ color: i >= 5 ? '#CFC2B2' : '#B7A693' }}>
+          <div key={w} className="text-center text-[12px] font-medium py-1" style={{ color: i >= 5 ? '#C5BDB2' : '#968C83' }}>
             {w}
           </div>
         ))}
@@ -124,9 +124,9 @@ export default function Calendar({
           const isSelected = selectedDate ? new Date(selectedDate).getDate() === day && new Date(selectedDate).getMonth() === month : false;
 
           let bg = 'transparent';
-          if (weekday) bg = hasReport ? 'rgba(244, 231, 218, 0.85)' : 'rgba(241, 236, 229, 0.5)';
-          if (inSelectedWeek) bg = 'rgba(217, 146, 94, 0.18)';
-          if (isSelected) bg = 'rgba(217, 146, 94, 0.32)';
+          if (weekday) bg = hasReport ? 'rgba(247, 218, 217, 0.45)' : 'rgba(214, 210, 196, 0.28)';
+          if (inSelectedWeek) bg = 'rgba(247, 218, 217, 0.6)';
+          if (isSelected) bg = 'rgba(247, 218, 217, 0.95)';
 
           return (
             <button
@@ -136,14 +136,14 @@ export default function Calendar({
               className={`day-cell ${cellSize} flex flex-col items-center justify-center rounded-2xl relative`}
               style={{
                 backgroundColor: bg,
-                border: today ? '2px solid #E0A86E' : '2px solid transparent',
+                border: today ? '2px solid #E6B6B2' : '2px solid transparent',
                 cursor: weekday ? 'pointer' : 'default',
               }}
             >
               <span
                 className={numSize}
                 style={{
-                  color: weekday ? (hasReport ? '#A56B43' : '#6B5D54') : '#CFC2B2',
+                  color: weekday ? (hasReport ? '#B27A75' : '#6D635B') : '#C5BDB2',
                   fontWeight: hasReport || today || isSelected ? 700 : 500,
                 }}
               >
@@ -155,12 +155,12 @@ export default function Calendar({
                   style={{
                     width: hasReport ? 6 : 5,
                     height: hasReport ? 6 : 5,
-                    backgroundColor: hasReport ? '#D9925E' : '#E0D4C6',
+                    backgroundColor: hasReport ? '#D49994' : '#D6D2C4',
                   }}
                 />
               )}
               {weekday && compact && hasReport && (
-                <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#D9925E' }} />
+                <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#D49994' }} />
               )}
             </button>
           );

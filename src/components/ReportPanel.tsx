@@ -139,11 +139,11 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
       .replace(/\n/g, '<br/>');
 
   const normalizeTags = (t: any): string[] => Array.isArray(t) ? t : (t ? String(t).split(',').filter(Boolean) : []);
-  const inputStyle = { backgroundColor: 'rgba(255,255,255,0.6)', border: '1.5px solid rgba(231,223,212,0.9)', color: '#3A2E28' };
+  const inputStyle = { backgroundColor: 'rgba(255,255,255,0.6)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43' };
 
   if (loading) {
     return (
-      <div className="glass rounded-[24px] p-8 expand-in text-center" style={{ color: '#B7A693' }}>
+      <div className="glass rounded-[24px] p-8 expand-in text-center" style={{ color: '#B6ADA3' }}>
         加载中…
       </div>
     );
@@ -154,11 +154,11 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
     return (
       <div className="glass-strong rounded-[24px] p-6 sm:p-7 expand-in">
         <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(244,231,218,0.7)' }}>
-            <CalIcon size={14} style={{ color: '#B06B3E' }} />
-            <span className="text-[13px] font-bold" style={{ color: '#B06B3E' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(247,218,217,0.7)' }}>
+            <CalIcon size={14} style={{ color: '#B27A75' }} />
+            <span className="text-[13px] font-bold" style={{ color: '#B27A75' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</span>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#B7A693' }}>
+          <button onClick={onClose} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#B6ADA3' }}>
             <X size={18} />
           </button>
         </div>
@@ -172,7 +172,7 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
         />
 
         <div className="relative mb-4">
-          <Hash size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#C4B4A2' }} />
+          <Hash size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#B6ADA3' }} />
           <input
             value={tags}
             onChange={(e) => setTags(e.target.value)}
@@ -183,9 +183,9 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
         </div>
 
         <div className="flex items-center gap-1 mb-2">
-          <button onClick={() => insertMarkdown('**')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }} title="加粗"><Bold size={15} /></button>
-          <button onClick={() => insertMarkdown('*')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }} title="斜体"><Italic size={15} /></button>
-          <button onClick={() => insertMarkdown('- ')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }} title="列表"><List size={15} /></button>
+          <button onClick={() => insertMarkdown('**')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="加粗"><Bold size={15} /></button>
+          <button onClick={() => insertMarkdown('*')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="斜体"><Italic size={15} /></button>
+          <button onClick={() => insertMarkdown('- ')} className="p-1.5 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="列表"><List size={15} /></button>
         </div>
 
         <textarea
@@ -199,13 +199,13 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
         />
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-[13px] cursor-pointer" style={{ color: '#9C8C7C' }}>
-            <input type="checkbox" checked={commentEnabled} onChange={(e) => setCommentEnabled(e.target.checked)} style={{ accentColor: '#C9956A' }} />
+          <label className="flex items-center gap-2 text-[13px] cursor-pointer" style={{ color: '#968C83' }}>
+            <input type="checkbox" checked={commentEnabled} onChange={(e) => setCommentEnabled(e.target.checked)} style={{ accentColor: '#C98D88' }} />
             允许跟帖评论
           </label>
           <div className="flex items-center gap-2">
             {reportId && (
-              <button onClick={() => { setEditing(false); load(); }} className="px-4 py-2.5 text-[14px] transition-all" style={{ color: '#9C8C7C' }}>
+              <button onClick={() => { setEditing(false); load(); }} className="px-4 py-2.5 text-[14px] transition-all" style={{ color: '#968C83' }}>
                 取消
               </button>
             )}
@@ -213,7 +213,7 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
               onClick={handleSave}
               disabled={saving}
               className="flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[14px] font-semibold text-white transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #D49263 0%, #B06B3E 100%)', boxShadow: '0 6px 18px rgba(176,107,62,0.3)' }}
+              style={{ background: 'linear-gradient(135deg, #D49994 0%, #B27A75 100%)', boxShadow: '0 6px 18px rgba(178,122,117,0.3)' }}
             >
               <Save size={16} />
               {saving ? '保存中…' : '发布'}
@@ -228,16 +228,16 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
   if (!reportId) {
     return (
       <div className="glass rounded-[24px] p-10 expand-in text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(244,231,218,0.7)' }}>
-          <FileX size={26} style={{ color: '#C9956A' }} />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(247,218,217,0.7)' }}>
+          <FileX size={26} style={{ color: '#C98D88' }} />
         </div>
-        <p className="text-[15px] mb-1" style={{ color: '#6B5D54', fontWeight: 500 }}>这一周还没有周记</p>
-        <p className="text-[13px] mb-5" style={{ color: '#B7A693' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</p>
+        <p className="text-[15px] mb-1" style={{ color: '#6D635B', fontWeight: 500 }}>这一周还没有周记</p>
+        <p className="text-[13px] mb-5" style={{ color: '#B6ADA3' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</p>
         <button onClick={startEdit} className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl text-[13.5px] font-semibold text-white transition-all"
-          style={{ background: 'linear-gradient(135deg, #D49263 0%, #B06B3E 100%)' }}>
+          style={{ background: 'linear-gradient(135deg, #D49994 0%, #B27A75 100%)' }}>
           <Edit3 size={15} /> 写这周的周记
         </button>
-        <button onClick={onClose} className="block mx-auto mt-3 text-[12.5px]" style={{ color: '#B7A693' }}>收起</button>
+        <button onClick={onClose} className="block mx-auto mt-3 text-[12.5px]" style={{ color: '#B6ADA3' }}>收起</button>
       </div>
     );
   }
@@ -250,23 +250,23 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
         {/* 顶部：日期 + 操作 */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13.5px] font-bold" style={{ background: 'rgba(244,231,218,0.85)', color: '#B06B3E' }}>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13.5px] font-bold" style={{ background: 'rgba(247,218,217,0.85)', color: '#B27A75' }}>
               <CalIcon size={14} />
               {fmtCN(report.week_start)} – {fmtCN(report.week_end)}
             </span>
             {tagList.map((t) => (
-              <span key={t} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px]" style={{ background: 'rgba(241,236,229,0.8)', color: '#9C8C7C' }}>
+              <span key={t} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px]" style={{ background: 'rgba(214,210,196,0.8)', color: '#968C83' }}>
                 <Tag size={10} />{t}
               </span>
             ))}
           </div>
           <div className="flex items-center gap-0.5 flex-shrink-0">
-            <button onClick={handleShare} className="p-2 rounded-xl transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }} title="分享">
+            <button onClick={handleShare} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="分享">
               <Share2 size={16} />
             </button>
             {user && (
               <>
-                <button onClick={startEdit} className="p-2 rounded-xl transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#9C8C7C' }} title="编辑">
+                <button onClick={startEdit} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#968C83' }} title="编辑">
                   <Edit3 size={16} />
                 </button>
                 <button onClick={handleDelete} className="p-2 rounded-xl transition-all hover:bg-[rgba(251,238,234,0.9)]" style={{ color: '#C49A8E' }} title="删除">
@@ -274,17 +274,17 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
                 </button>
               </>
             )}
-            <button onClick={onClose} className="p-2 rounded-xl transition-all hover:bg-[rgba(244,231,218,0.7)]" style={{ color: '#B7A693' }} title="收起">
+            <button onClick={onClose} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#B6ADA3' }} title="收起">
               <X size={16} />
             </button>
           </div>
         </div>
 
         {/* 标题 — 大字号衬线 */}
-        <h1 className="font-serif-art text-[26px] sm:text-[30px] font-bold leading-tight mb-5" style={{ color: '#3A2E28', letterSpacing: '-0.02em' }}>
+        <h1 className="font-serif-art text-[26px] sm:text-[30px] font-bold leading-tight mb-5" style={{ color: '#514A43', letterSpacing: '-0.02em' }}>
           {report.title}
         </h1>
-        <div className="w-12 h-1 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #E0A86E, #F4E7DA)' }} />
+        <div className="w-12 h-1 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #E6B6B2, #FCEAE9)' }} />
 
         <div className="prose-art" dangerouslySetInnerHTML={{ __html: renderContent(report.content) }} />
       </article>

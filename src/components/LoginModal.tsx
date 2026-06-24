@@ -39,8 +39,8 @@ export default function LoginModal() {
       >
         <button
           onClick={closeLoginModal}
-          className="absolute right-5 top-5 p-1.5 rounded-full hover:bg-[#F5F0E8] transition-colors"
-          style={{ color: '#B5A595' }}
+          className="absolute right-5 top-5 p-1.5 rounded-full hover:bg-[#FFF5EA] transition-colors"
+          style={{ color: '#B6ADA3' }}
         >
           <X size={18} />
         </button>
@@ -48,14 +48,14 @@ export default function LoginModal() {
         <div className="text-center mb-7">
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'linear-gradient(135deg, #F6D9C2 0%, #EDB890 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #F7DAD9 0%, #EFC3C0 100%)' }}
           >
-            <PenLine size={26} style={{ color: '#8A5A3C' }} />
+            <PenLine size={26} style={{ color: '#B27A75' }} />
           </div>
-          <h2 className="text-[22px] font-bold mb-1.5" style={{ color: '#3C2F2F', letterSpacing: '-0.02em' }}>
+          <h2 className="text-[22px] font-bold mb-1.5" style={{ color: '#514A43', letterSpacing: '-0.02em' }}>
             作者登录
           </h2>
-          <p className="text-[13px]" style={{ color: '#A89684' }}>
+          <p className="text-[13px]" style={{ color: '#968C83' }}>
             创建或编辑周报需要验证身份
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function LoginModal() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <div className="relative">
-              <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#C4B4A2' }} />
+              <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#B6ADA3' }} />
               <input
                 type="email"
                 value={email}
@@ -72,12 +72,12 @@ export default function LoginModal() {
                 autoFocus
                 className="w-full pl-11 pr-3.5 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{
-                  backgroundColor: '#FAF7F2',
-                  border: '1.5px solid #ECE3D8',
-                  color: '#3C2F2F',
+                  backgroundColor: '#FFFAF3',
+                  border: '1.5px solid #D6D2C4',
+                  color: '#514A43',
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#E8A87C')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#ECE3D8')}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#E6B6B2')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#D6D2C4')}
                 required
               />
             </div>
@@ -85,7 +85,7 @@ export default function LoginModal() {
 
           <div>
             <div className="relative">
-              <Lock size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#C4B4A2' }} />
+              <Lock size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#B6ADA3' }} />
               <input
                 type="password"
                 value={password}
@@ -93,12 +93,12 @@ export default function LoginModal() {
                 placeholder="密码"
                 className="w-full pl-11 pr-3.5 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{
-                  backgroundColor: '#FAF7F2',
-                  border: '1.5px solid #ECE3D8',
-                  color: '#3C2F2F',
+                  backgroundColor: '#FFFAF3',
+                  border: '1.5px solid #D6D2C4',
+                  color: '#514A43',
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#E8A87C')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#ECE3D8')}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#E6B6B2')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#D6D2C4')}
                 required
               />
             </div>
@@ -114,13 +114,13 @@ export default function LoginModal() {
             type="submit"
             disabled={loading}
             className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg, #C58A5E 0%, #A56B43 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #D49994 0%, #B27A75 100%)' }}
           >
             {loading ? '登录中...' : '登 录'}
           </button>
         </form>
 
-        <p className="mt-5 text-[12px] text-center" style={{ color: '#C4B4A2' }}>
+        <p className="mt-5 text-[12px] text-center" style={{ color: '#B6ADA3' }}>
           演示账号 admin@weekly.local / admin123
         </p>
       </div>
