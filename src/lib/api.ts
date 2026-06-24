@@ -47,6 +47,29 @@ export async function apiRequest(method: string, endpoint: string, body?: any) {
     return getMe();
   }
 
+  // ---------- 设置项（如本月目标）读取 ----------
+  if (endpoint.match(/^\/settings\/[^/]+$/) && method === 'GET') {
+    const key = decodeURIComponent(endpoint.split('/')[2]);
+    const { data, error } = await supabase.from('settings').select('value').eq('key', key).maybeSingle();
+    if (error) {
+      // settings 表未迁移则静默返回空
+      if (/settings/.test(error.message)) return { value: '' };
+      throw new Error(error.message);
+    }
+    return { value: (data as any)?.value ?? '' };
+  }
+
+  // ---------- 设置项写入（仅作者）----------
+  if (endpoint.match(/^\/settings\/[^/]+$/) && method === 'PUT') {
+    if (!isAuthor()) throw new Error('仅作者可编辑');
+    const key = decodeURIComponent(endpoint.split('/')[2]);
+    const { error } = await supabase
+      .from('settings')
+      .upsert({ key, value: body.value ?? '', updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw new Error(error.message);
+    return { value: body.value ?? '' };
+  }
+
   // ---------- 周报列表 ----------
   if (endpoint === '/reports' && method === 'GET') {
     const { data, error } = await supabase

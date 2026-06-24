@@ -128,7 +128,12 @@ export default function Dashboard() {
     <div className="max-w-6xl mx-auto" style={{ padding: 'var(--sp-8) var(--sp-5)' }}>
       <div className="dash-grid">
         {/* 左窄栏 */}
-        <Sidebar reportCount={reports.length} attendance={attendance} onNewReport={handleNewReport} />
+        <Sidebar
+          reportCount={reports.length}
+          attendance={attendance}
+          monthKey={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`}
+          onNewReport={handleNewReport}
+        />
 
         {/* 右宽栏 */}
         <main className="stack-5 min-w-0">

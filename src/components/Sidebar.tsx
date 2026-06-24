@@ -1,14 +1,52 @@
-import { PenLine, BookMarked, CalendarCheck, LogIn, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { PenLine, BookMarked, CalendarCheck, LogIn, LogOut, Target, Pencil, Check, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { apiRequest } from '../lib/api';
 
 interface SidebarProps {
   reportCount: number;
   attendance: { done: number; total: number };
+  monthKey: string; // yyyy-mm，用于本月目标存储
   onNewReport: () => void;
 }
 
-export default function Sidebar({ reportCount, attendance, onNewReport }: SidebarProps) {
-  const { user, logout, openLoginModal } = useAuth();
+export default function Sidebar({ reportCount, attendance, monthKey, onNewReport }: SidebarProps) {
+  const { user, logout, openLoginModal, showToast } = useAuth();
+
+  const [goal, setGoal] = useState('');
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalDraft, setGoalDraft] = useState('');
+  const [savingGoal, setSavingGoal] = useState(false);
+
+  const goalSettingKey = `goal_${monthKey}`;
+
+  useEffect(() => {
+    let alive = true;
+    apiRequest('GET', `/settings/${encodeURIComponent(goalSettingKey)}`)
+      .then((res: any) => { if (alive) setGoal(res?.value || ''); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [goalSettingKey]);
+
+  const startEditGoal = () => {
+    if (!user) { openLoginModal(() => { setGoalDraft(goal); setEditingGoal(true); }); return; }
+    setGoalDraft(goal);
+    setEditingGoal(true);
+  };
+
+  const saveGoal = async () => {
+    setSavingGoal(true);
+    try {
+      await apiRequest('PUT', `/settings/${encodeURIComponent(goalSettingKey)}`, { value: goalDraft.trim() });
+      setGoal(goalDraft.trim());
+      setEditingGoal(false);
+      showToast('本月目标已更新', 'success');
+    } catch (e: any) {
+      showToast(e.message || '保存失败', 'error');
+    } finally {
+      setSavingGoal(false);
+    }
+  };
 
   return (
     <aside className="glass rounded-[28px] fade-up" style={{ alignSelf: 'start', padding: 'var(--sp-6)' }}>
@@ -71,6 +109,58 @@ export default function Sidebar({ reportCount, attendance, onNewReport }: Sideba
               {attendance.done}<span className="text-[13px] font-normal" style={{ color: '#B6ADA3', marginLeft: 3 }}>/ {attendance.total} 天</span>
             </p>
           </div>
+        </div>
+
+        {/* 本月目标 */}
+        <div className="rounded-[16px]" style={{ background: 'rgba(247, 218, 217, 0.22)', padding: 'var(--sp-4)' }}>
+          <div className="flex items-center" style={{ gap: 'var(--sp-2)', marginBottom: 'var(--sp-2)' }}>
+            <div className="rounded-[10px] flex items-center justify-center flex-shrink-0"
+              style={{ width: 26, height: 26, background: 'rgba(201, 141, 136, 0.16)' }}>
+              <Target size={14} style={{ color: '#C98D88' }} />
+            </div>
+            <span className="text-[12px] tracking-cn flex-1" style={{ color: '#968C83' }}>本月目标</span>
+            {!editingGoal && (
+              <button
+                onClick={startEditGoal}
+                className="p-1 rounded-lg transition-all hover:bg-[rgba(247,218,217,0.7)]"
+                style={{ color: '#C4B4A2' }}
+                title="编辑本月目标"
+              >
+                <Pencil size={13} />
+              </button>
+            )}
+          </div>
+
+          {editingGoal ? (
+            <div>
+              <textarea
+                value={goalDraft}
+                onChange={(e) => setGoalDraft(e.target.value)}
+                placeholder="写下这个月想达成的目标…"
+                rows={3}
+                maxLength={200}
+                autoFocus
+                className="input-soft w-full outline-none resize-none tracking-cn"
+                style={{ backgroundColor: 'rgba(255,255,255,0.85)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43', borderRadius: 12, padding: '9px 12px', fontSize: 13, lineHeight: 1.7 }}
+              />
+              <div className="flex justify-end items-center" style={{ gap: 'var(--sp-2)', marginTop: 'var(--sp-2)' }}>
+                <button onClick={() => setEditingGoal(false)} className="flex items-center gap-1 text-[12px] px-2.5 py-1 rounded-lg tracking-cn transition-all hover:bg-[rgba(214,210,196,0.4)]" style={{ color: '#968C83' }}>
+                  <X size={13} /> 取消
+                </button>
+                <button onClick={saveGoal} disabled={savingGoal} className="btn btn-primary tracking-cn disabled:opacity-50" style={{ padding: '5px 12px', borderRadius: 9, fontSize: 12 }}>
+                  <Check size={13} /> 保存
+                </button>
+              </div>
+            </div>
+          ) : goal ? (
+            <p className="text-[13px] tracking-cn" style={{ color: '#6D635B', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {goal}
+            </p>
+          ) : (
+            <button onClick={startEditGoal} className="text-[12.5px] tracking-cn transition-all hover:opacity-70" style={{ color: '#B6ADA3' }}>
+              + 点此设定本月目标
+            </button>
+          )}
         </div>
       </div>
 

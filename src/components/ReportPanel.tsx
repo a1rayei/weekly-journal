@@ -122,7 +122,7 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
       const payload = {
         title,
         content,
-        tags: tags.split(',').map((t) => t.trim()).filter(Boolean).join(','),
+        tags: tags.split(/[,，、\s]+/).map((t) => t.trim()).filter(Boolean).join(','),
         week_start: weekStart,
         week_end: weekEnd,
         comment_enabled: commentEnabled,
@@ -181,7 +181,7 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
       .replace(/^- (.*)$/gm, '<li>$1</li>')
       .replace(/\n/g, '<br/>');
 
-  const normalizeTags = (t: any): string[] => Array.isArray(t) ? t : (t ? String(t).split(',').filter(Boolean) : []);
+  const normalizeTags = (t: any): string[] => Array.isArray(t) ? t : (t ? String(t).split(/[,，、\s]+/).filter(Boolean) : []);
   const inputStyle = { backgroundColor: 'rgba(255,255,255,0.6)', border: '1.5px solid rgba(214,210,196,0.9)', color: '#514A43' };
 
   if (loading) {
