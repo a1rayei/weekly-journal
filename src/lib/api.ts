@@ -1,155 +1,146 @@
-export * from './mockApi';
+import { supabase, AUTHOR_EMAIL, AUTHOR_PASSWORD } from './supabaseClient';
 
-import {
-  login as mockLogin,
-  getMe,
-  getReports,
-  getReportById,
-  createReport,
-  updateReport,
-  deleteReport,
-  getComments,
-  createComment,
-  deleteComment,
-  getVersions,
-  getVersion,
-  saveDraft,
-  getDraft,
-  getCalendar,
-  getShareToken,
-  getShareReport,
-} from './mockApi';
+// 统一的 REST 风格适配层：把 apiRequest(method, endpoint, body) 映射到 Supabase 调用
+// 返回的数据字段统一为前端使用的 snake_case，与原 mock 接口保持一致。
 
-function toSnakeCase(obj: any): any {
-  if (Array.isArray(obj)) return obj.map(toSnakeCase);
-  if (obj === null || typeof obj !== 'object') return obj;
-  const result: any = {};
-  for (const [key, val] of Object.entries(obj)) {
-    const snakeKey = key.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
-    result[snakeKey] = toSnakeCase(val);
-  }
-  return result;
+function isAuthor(): boolean {
+  return localStorage.getItem('token') === 'author-ok';
 }
 
-function addWeekEnd(report: any): any {
-  if (!report) return report;
-  const r = { ...report };
-  if (r.week_start && !r.week_end) {
-    const d = new Date(r.week_start);
-    d.setDate(d.getDate() + 4);
-    r.week_end = d.toISOString().split('T')[0];
-  }
-  if (r.weekStart && !r.weekEnd) {
-    const d = new Date(r.weekStart);
-    d.setDate(d.getDate() + 4);
-    r.weekEnd = d.toISOString().split('T')[0];
-  }
-  return r;
+export function clearAuthToken() {
+  localStorage.removeItem('token');
 }
 
-export async function apiRequest(method: string, endpoint: string, body?: any, token?: string) {
-  await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+async function login(email: string, password: string) {
+  if (email.trim().toLowerCase() === AUTHOR_EMAIL && password === AUTHOR_PASSWORD) {
+    localStorage.setItem('token', 'author-ok');
+    return { user: { id: '1', email: AUTHOR_EMAIL, name: 'rei', role: 'admin' } };
+  }
+  throw new Error('邮箱或密码错误');
+}
 
+function getMe() {
+  if (isAuthor()) {
+    return { user: { id: '1', email: AUTHOR_EMAIL, name: 'rei', role: 'admin' } };
+  }
+  return null;
+}
+
+// 计算 week_end（若缺失）
+function withWeekEnd(r: any) {
+  if (!r) return r;
+  const out = { ...r };
+  if (out.week_start && !out.week_end) {
+    const d = new Date(out.week_start);
+    d.setDate(d.getDate() + 4);
+    out.week_end = d.toISOString().split('T')[0];
+  }
+  return out;
+}
+
+export async function apiRequest(method: string, endpoint: string, body?: any) {
+  // ---------- 认证 ----------
   if (endpoint === '/auth/login' && method === 'POST') {
-    return mockLogin(body.email, body.password);
+    return login(body.email, body.password);
   }
   if (endpoint === '/auth/me' && method === 'GET') {
     return getMe();
   }
+
+  // ---------- 周报列表 ----------
   if (endpoint === '/reports' && method === 'GET') {
-    const { reports } = await getReports(body);
-    return reports.map((r: any) => toSnakeCase(addWeekEnd(r)));
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .order('week_start', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data || []).map(withWeekEnd);
   }
-  if (endpoint.match(/^\/reports\/[^\/]+$/) && method === 'GET') {
+
+  // ---------- 单篇周报 ----------
+  if (endpoint.match(/^\/reports\/[^/]+$/) && method === 'GET') {
     const id = endpoint.split('/')[2];
-    const { report } = await getReportById(id);
-    return toSnakeCase(addWeekEnd(report));
+    const { data, error } = await supabase.from('reports').select('*').eq('id', id).single();
+    if (error) throw new Error('周报不存在');
+    return withWeekEnd(data);
   }
+
+  // ---------- 新建周报 ----------
   if (endpoint === '/reports' && method === 'POST') {
+    if (!isAuthor()) throw new Error('仅作者可发布周记');
     const payload = {
       title: body.title,
-      weekStart: body.week_start,
       content: body.content,
       tags: body.tags || '',
-      status: body.status || 'published',
-      commentEnabled: body.comment_enabled ?? true,
+      week_start: body.week_start,
+      week_end: body.week_end,
+      comment_enabled: body.comment_enabled ?? true,
     };
-    const { report } = await createReport(payload);
-    return toSnakeCase(addWeekEnd(report));
+    const { data, error } = await supabase.from('reports').insert(payload).select().single();
+    if (error) throw new Error(error.message);
+    return withWeekEnd(data);
   }
-  if (endpoint.match(/^\/reports\/[^\/]+$/) && method === 'PUT') {
+
+  // ---------- 更新周报 ----------
+  if (endpoint.match(/^\/reports\/[^/]+$/) && method === 'PUT') {
+    if (!isAuthor()) throw new Error('仅作者可编辑周记');
     const id = endpoint.split('/')[2];
     const payload = {
       title: body.title,
-      weekStart: body.week_start,
       content: body.content,
       tags: body.tags || '',
-      status: body.status || 'published',
-      commentEnabled: body.comment_enabled ?? true,
+      week_start: body.week_start,
+      week_end: body.week_end,
+      comment_enabled: body.comment_enabled ?? true,
+      updated_at: new Date().toISOString(),
     };
-    const { report } = await updateReport(id, payload);
-    return toSnakeCase(addWeekEnd(report));
+    const { data, error } = await supabase.from('reports').update(payload).eq('id', id).select().single();
+    if (error) throw new Error(error.message);
+    return withWeekEnd(data);
   }
-  if (endpoint.match(/^\/reports\/[^\/]+$/) && method === 'DELETE') {
+
+  // ---------- 删除周报 ----------
+  if (endpoint.match(/^\/reports\/[^/]+$/) && method === 'DELETE') {
+    if (!isAuthor()) throw new Error('仅作者可删除周记');
     const id = endpoint.split('/')[2];
-    return deleteReport(id);
+    const { error } = await supabase.from('reports').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    return { success: true };
   }
-  if (endpoint.match(/^\/comments\/[^\/]+$/) && method === 'GET') {
+
+  // ---------- 评论列表 ----------
+  if (endpoint.match(/^\/comments\/[^/]+$/) && method === 'GET') {
     const reportId = endpoint.split('/')[2];
-    const { comments } = await getComments(reportId);
-    return toSnakeCase(comments);
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('report_id', reportId)
+      .order('created_at', { ascending: true });
+    if (error) throw new Error(error.message);
+    return data || [];
   }
-  if (endpoint.match(/^\/comments\/[^\/]+$/) && method === 'POST') {
+
+  // ---------- 发表评论（免登录）----------
+  if (endpoint.match(/^\/comments\/[^/]+$/) && method === 'POST') {
     const reportId = endpoint.split('/')[2];
     const payload = {
-      authorName: body.author_name || body.authorName,
+      report_id: reportId,
+      author_name: body.author_name || body.authorName,
       content: body.content,
-      parentId: body.parent_id || body.parentId || null,
+      parent_id: body.parent_id || body.parentId || null,
     };
-    const { comment } = await createComment(reportId, payload);
-    return toSnakeCase(comment);
+    const { data, error } = await supabase.from('comments').insert(payload).select().single();
+    if (error) throw new Error(error.message);
+    return data;
   }
-  if (endpoint.match(/^\/comments\/[^\/]+$/) && method === 'DELETE') {
+
+  // ---------- 删除评论 ----------
+  if (endpoint.match(/^\/comments\/[^/]+$/) && method === 'DELETE') {
+    if (!isAuthor()) throw new Error('仅作者可删除评论');
     const id = endpoint.split('/')[2];
-    return deleteComment(id);
-  }
-  if (endpoint.match(/^\/reports\/[^\/]+\/versions$/) && method === 'GET') {
-    const reportId = endpoint.split('/')[2];
-    const { versions } = await getVersions(reportId);
-    return toSnakeCase(versions);
-  }
-  if (endpoint.match(/^\/versions\/[^\/]+$/) && method === 'GET') {
-    const id = endpoint.split('/')[2];
-    const { version } = await getVersion(id);
-    return toSnakeCase(version);
-  }
-  if (endpoint.match(/^\/reports\/[^\/]+\/draft$/) && method === 'POST') {
-    const reportId = endpoint.split('/')[2];
-    return saveDraft(reportId, body.content);
-  }
-  if (endpoint.match(/^\/reports\/[^\/]+\/draft$/) && method === 'GET') {
-    const reportId = endpoint.split('/')[2];
-    const { draft } = await getDraft(reportId);
-    return toSnakeCase(draft);
-  }
-  if (endpoint === '/calendar' && method === 'GET') {
-    return getCalendar(body?.month);
-  }
-  if (endpoint.match(/^\/share\/[^\/]+$/) && method === 'GET') {
-    const shareLink = endpoint.split('/')[2];
-    const { report } = await getShareToken(shareLink);
-    return toSnakeCase(addWeekEnd(report));
-  }
-  if (endpoint.match(/^\/share\/[^\/]+\/report$/) && method === 'GET') {
-    const shareLink = endpoint.split('/')[2];
-    const { report } = await getShareReport(shareLink);
-    return toSnakeCase(addWeekEnd(report));
-  }
-  if (endpoint.match(/^\/share\/[^\/]+$/) && method === 'POST') {
-    const id = endpoint.split('/')[2];
-    const { report } = await getReportById(id);
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    return { shareUrl: `${origin}/share/${report.shareLink}` };
+    const { error } = await supabase.from('comments').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    return { success: true };
   }
 
   throw new Error(`Not implemented: ${method} ${endpoint}`);

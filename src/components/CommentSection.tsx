@@ -56,7 +56,6 @@ export default function CommentSection({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !content.trim()) return;
-
     setLoading(true);
     try {
       await apiRequest('POST', `/comments/${reportId}`, { author_name: name, content });
@@ -87,52 +86,35 @@ export default function CommentSection({
   };
 
   return (
-    <div className="bg-white rounded-3xl p-7" style={{ border: '1.5px solid #F0E8DD' }}>
-      <div className="flex items-center gap-2 mb-6">
-        <MessageCircle size={18} style={{ color: '#D98E5F' }} />
-        <h2 className="font-serif text-[18px] font-bold" style={{ color: '#3A2E28' }}>
-          跟帖评论
-        </h2>
+    <div>
+      <div className="flex items-center gap-2 mb-5">
+        <MessageCircle size={18} style={{ color: '#D9925E' }} />
+        <h2 className="font-serif-art text-[18px] font-bold" style={{ color: '#3A2E28' }}>跟帖评论</h2>
         <span className="text-[13px]" style={{ color: '#B5A595' }}>{comments.length}</span>
       </div>
 
       {comments.length === 0 ? (
-        <p className="text-[14px] text-center py-8" style={{ color: '#B5A595' }}>
-          还没有评论，来留下第一条吧
-        </p>
+        <p className="text-[14px] text-center py-6" style={{ color: '#B5A595' }}>还没有评论，来留下第一条吧</p>
       ) : (
-        <div className="space-y-5 mb-7">
+        <div className="space-y-5 mb-6">
           {comments.map((comment) => {
             const [bg, fg] = avatarColor(comment.author_name);
             return (
               <div key={comment.id} className="flex gap-3.5">
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[14px] font-bold"
-                  style={{ backgroundColor: bg, color: fg }}
-                >
+                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[14px] font-bold" style={{ backgroundColor: bg, color: fg }}>
                   {comment.author_name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[14px] font-semibold" style={{ color: '#3A2E28' }}>
-                      {comment.author_name}
-                    </span>
-                    <span className="text-[12px]" style={{ color: '#C4B4A2' }}>
-                      {formatDate(comment.created_at)}
-                    </span>
+                    <span className="text-[14px] font-semibold" style={{ color: '#3A2E28' }}>{comment.author_name}</span>
+                    <span className="text-[12px]" style={{ color: '#C4B4A2' }}>{formatDate(comment.created_at)}</span>
                     {isAuthor && (
-                      <button
-                        onClick={() => handleDelete(comment.id)}
-                        className="ml-auto p-1 rounded transition-all hover:bg-[#FBEEEA]"
-                        style={{ color: '#C4B4A2' }}
-                      >
+                      <button onClick={() => handleDelete(comment.id)} className="ml-auto p-1 rounded transition-all hover:bg-[rgba(251,238,234,0.9)]" style={{ color: '#C4B4A2' }}>
                         <Trash2 size={13} />
                       </button>
                     )}
                   </div>
-                  <p className="text-[14px] leading-relaxed" style={{ color: '#6B5D54' }}>
-                    {comment.content}
-                  </p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: '#6B5D54' }}>{comment.content}</p>
                 </div>
               </div>
             );
@@ -141,7 +123,7 @@ export default function CommentSection({
       )}
 
       {commentEnabled ? (
-        <form onSubmit={handleSubmit} className="pt-5" style={{ borderTop: '1px solid #F0E8DD' }}>
+        <form onSubmit={handleSubmit} className="pt-5" style={{ borderTop: '1px solid rgba(231,223,212,0.8)' }}>
           <div className="flex flex-col gap-3">
             <input
               type="text"
@@ -149,8 +131,8 @@ export default function CommentSection({
               onChange={(e) => setName(e.target.value)}
               placeholder="你的名字（无需登录）"
               maxLength={20}
-              className="input-soft w-full sm:w-48 px-4 py-2.5 rounded-xl text-[14px] outline-none"
-              style={{ backgroundColor: '#FAF7F2', border: '1.5px solid #ECE3D8', color: '#3A2E28' }}
+              className="input-soft w-full sm:w-52 px-4 py-2.5 rounded-2xl text-[14px] outline-none"
+              style={{ backgroundColor: 'rgba(255,255,255,0.6)', border: '1.5px solid rgba(231,223,212,0.9)', color: '#3A2E28' }}
             />
             <div className="relative">
               <textarea
@@ -159,14 +141,14 @@ export default function CommentSection({
                 placeholder="写下你的想法、建议或鼓励…"
                 maxLength={1000}
                 rows={3}
-                className="input-soft w-full px-4 py-3 pr-12 rounded-xl text-[14px] outline-none resize-none leading-relaxed"
-                style={{ backgroundColor: '#FAF7F2', border: '1.5px solid #ECE3D8', color: '#3A2E28' }}
+                className="input-soft w-full px-4 py-3 pr-12 rounded-2xl text-[14px] outline-none resize-none leading-relaxed"
+                style={{ backgroundColor: 'rgba(255,255,255,0.6)', border: '1.5px solid rgba(231,223,212,0.9)', color: '#3A2E28' }}
               />
               <button
                 type="submit"
                 disabled={loading || !name.trim() || !content.trim()}
-                className="absolute right-3 bottom-3 p-2 rounded-lg text-white disabled:opacity-30 transition-all"
-                style={{ background: 'linear-gradient(135deg, #C58A5E 0%, #A56B43 100%)' }}
+                className="absolute right-3 bottom-3 p-2 rounded-xl text-white disabled:opacity-30 transition-all"
+                style={{ background: 'linear-gradient(135deg, #D49263 0%, #B06B3E 100%)' }}
               >
                 <Send size={15} />
               </button>
@@ -174,9 +156,7 @@ export default function CommentSection({
           </div>
         </form>
       ) : (
-        <p className="text-[14px] text-center py-4" style={{ color: '#B5A595', borderTop: '1px solid #F0E8DD' }}>
-          该周记已关闭评论
-        </p>
+        <p className="text-[14px] text-center py-4" style={{ color: '#B5A595', borderTop: '1px solid rgba(231,223,212,0.8)' }}>该周记已关闭评论</p>
       )}
     </div>
   );

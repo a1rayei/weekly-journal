@@ -29,12 +29,12 @@ export default function LoginModal() {
   return (
     <div
       className="fixed inset-0 z-[90] flex items-center justify-center p-4 modal-backdrop"
-      style={{ backgroundColor: 'rgba(60, 47, 47, 0.32)', backdropFilter: 'blur(3px)' }}
+      style={{ backgroundColor: 'rgba(60, 47, 47, 0.28)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onClick={closeLoginModal}
     >
       <div
-        className="w-full max-w-[380px] bg-white rounded-3xl p-8 modal-content relative"
-        style={{ boxShadow: '0 24px 60px rgba(120, 90, 60, 0.22)' }}
+        className="w-full max-w-[380px] rounded-[28px] p-8 modal-content relative"
+        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 24px 60px rgba(120, 90, 60, 0.22)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button

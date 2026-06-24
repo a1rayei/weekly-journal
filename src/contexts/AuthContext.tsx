@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const data = await apiRequest('POST', '/auth/login', { email, password });
     if (data.user) {
-      localStorage.setItem('token', 'mock-token');
+      // token 已由 apiRequest 内部写入（'author-ok'）
       setUser(data.user);
       setLoginModalOpen(false);
       showToast('登录成功，欢迎回来', 'success');
