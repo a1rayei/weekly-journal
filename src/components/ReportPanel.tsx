@@ -143,7 +143,7 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
 
   if (loading) {
     return (
-      <div className="glass rounded-[24px] p-8 expand-in text-center" style={{ color: '#B6ADA3' }}>
+      <div className="glass rounded-[28px] expand-in text-center" style={{ color: '#B6ADA3', padding: 'var(--sp-8)' }}>
         加载中…
       </div>
     );
@@ -152,11 +152,11 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
   // ===== 编辑/新建态 =====
   if (editing) {
     return (
-      <div className="glass-strong rounded-[24px] p-6 sm:p-7 expand-in">
-        <div className="flex items-center justify-between mb-5">
+      <div className="glass-strong rounded-[28px] expand-in" style={{ padding: 'var(--sp-6)' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-5)' }}>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(247,218,217,0.7)' }}>
             <CalIcon size={14} style={{ color: '#B27A75' }} />
-            <span className="text-[13px] font-bold" style={{ color: '#B27A75' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</span>
+            <span className="text-[13px] font-bold tracking-cn" style={{ color: '#B27A75' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</span>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.7)]" style={{ color: '#B6ADA3' }}>
             <X size={18} />
@@ -205,15 +205,15 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
           </label>
           <div className="flex items-center gap-2">
             {reportId && (
-              <button onClick={() => { setEditing(false); load(); }} className="px-4 py-2.5 text-[14px] transition-all" style={{ color: '#968C83' }}>
+              <button onClick={() => { setEditing(false); load(); }} className="btn btn-ghost tracking-cn" style={{ padding: '10px 18px', borderRadius: 14, fontSize: 14, fontWeight: 500 }}>
                 取消
               </button>
             )}
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[14px] font-semibold text-white transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #D49994 0%, #B27A75 100%)', boxShadow: '0 6px 18px rgba(178,122,117,0.3)' }}
+              className="btn btn-primary tracking-cn disabled:opacity-50"
+              style={{ padding: '10px 24px', borderRadius: 14, fontSize: 14 }}
             >
               <Save size={16} />
               {saving ? '保存中…' : '发布'}
@@ -227,17 +227,16 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
   // ===== 无周报空状态（访客） =====
   if (!reportId) {
     return (
-      <div className="glass rounded-[24px] p-10 expand-in text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(247,218,217,0.7)' }}>
+      <div className="glass rounded-[28px] expand-in text-center" style={{ padding: 'var(--sp-8)' }}>
+        <div className="rounded-2xl flex items-center justify-center mx-auto" style={{ width: 56, height: 56, marginBottom: 'var(--sp-4)', background: 'rgba(247,218,217,0.7)' }}>
           <FileX size={26} style={{ color: '#C98D88' }} />
         </div>
-        <p className="text-[15px] mb-1" style={{ color: '#6D635B', fontWeight: 500 }}>这一周还没有周记</p>
-        <p className="text-[13px] mb-5" style={{ color: '#B6ADA3' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</p>
-        <button onClick={startEdit} className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl text-[13.5px] font-semibold text-white transition-all"
-          style={{ background: 'linear-gradient(135deg, #D49994 0%, #B27A75 100%)' }}>
+        <p className="text-[15px] tracking-cn" style={{ color: '#6D635B', fontWeight: 500, marginBottom: 'var(--sp-1)' }}>这一周还没有周记</p>
+        <p className="text-[13px] tracking-cn" style={{ color: '#B6ADA3', marginBottom: 'var(--sp-5)' }}>{fmtCN(weekStart)} – {fmtCN(weekEnd)}</p>
+        <button onClick={startEdit} className="btn btn-primary tracking-cn" style={{ padding: '10px 20px', borderRadius: 16, fontSize: 13.5 }}>
           <Edit3 size={15} /> 写这周的周记
         </button>
-        <button onClick={onClose} className="block mx-auto mt-3 text-[12.5px]" style={{ color: '#B6ADA3' }}>收起</button>
+        <button onClick={onClose} className="block mx-auto text-[12.5px] tracking-cn" style={{ color: '#B6ADA3', marginTop: 'var(--sp-3)' }}>收起</button>
       </div>
     );
   }
@@ -245,17 +244,17 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
   // ===== 查看态 =====
   const tagList = normalizeTags(report?.tags);
   return (
-    <div className="expand-in space-y-4">
-      <article className="glass-strong rounded-[24px] p-6 sm:p-8">
+    <div className="expand-in stack-5">
+      <article className="glass-strong rounded-[28px]" style={{ padding: 'var(--sp-6)' }}>
         {/* 顶部：日期 + 操作 */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between" style={{ marginBottom: 'var(--sp-4)' }}>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13.5px] font-bold" style={{ background: 'rgba(247,218,217,0.85)', color: '#B27A75' }}>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13.5px] font-bold tracking-cn" style={{ background: 'rgba(247,218,217,0.85)', color: '#B27A75' }}>
               <CalIcon size={14} />
               {fmtCN(report.week_start)} – {fmtCN(report.week_end)}
             </span>
             {tagList.map((t) => (
-              <span key={t} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px]" style={{ background: 'rgba(214,210,196,0.8)', color: '#968C83' }}>
+              <span key={t} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] tracking-cn" style={{ background: 'rgba(214,210,196,0.8)', color: '#968C83' }}>
                 <Tag size={10} />{t}
               </span>
             ))}
@@ -281,15 +280,15 @@ export default function ReportPanel({ weekStart, weekEnd, reportId, forceEdit, o
         </div>
 
         {/* 标题 — 大字号衬线 */}
-        <h1 className="font-serif-art text-[26px] sm:text-[30px] font-bold leading-tight mb-5" style={{ color: '#514A43', letterSpacing: '-0.02em' }}>
+        <h1 className="font-serif-art text-[26px] sm:text-[30px] font-bold leading-tight tracking-cn-tight" style={{ color: '#514A43', marginBottom: 'var(--sp-4)' }}>
           {report.title}
         </h1>
-        <div className="w-12 h-1 rounded-full mb-6" style={{ background: 'linear-gradient(90deg, #E6B6B2, #FCEAE9)' }} />
+        <div className="rounded-full" style={{ width: 48, height: 4, marginBottom: 'var(--sp-5)', background: 'linear-gradient(90deg, #E6B6B2, #FCEAE9)' }} />
 
         <div className="prose-art" dangerouslySetInnerHTML={{ __html: renderContent(report.content) }} />
       </article>
 
-      <div className="glass rounded-[24px] p-6">
+      <div className="glass rounded-[28px]" style={{ padding: 'var(--sp-6)' }}>
         <CommentSection reportId={report.id} commentEnabled={commentEnabled} isAuthor={!!user} />
       </div>
     </div>

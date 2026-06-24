@@ -86,12 +86,12 @@ export default function Calendar({
   return (
     <div>
       {/* 头部 */}
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-serif-art font-bold leading-none" style={{ color: '#514A43', fontSize: compact ? 20 : 26, letterSpacing: '-0.02em' }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: 'var(--sp-5)' }}>
+        <h2 className="font-serif-art font-bold leading-none tracking-cn-tight" style={{ color: '#514A43', fontSize: compact ? 20 : 26 }}>
           {year} · {monthNames[month]}
         </h2>
         <div className="flex items-center gap-1">
-          <button onClick={onToday} className="px-3 py-1.5 text-[13px] rounded-xl transition-all hover:bg-[rgba(247,218,217,0.5)]" style={{ color: '#968C83' }}>
+          <button onClick={onToday} className="px-3 py-1.5 text-[13px] rounded-xl transition-all hover:bg-[rgba(247,218,217,0.5)] tracking-cn" style={{ color: '#968C83' }}>
             今天
           </button>
           <button onClick={onPrevMonth} className="p-2 rounded-xl transition-all hover:bg-[rgba(247,218,217,0.5)]" style={{ color: '#968C83' }}>

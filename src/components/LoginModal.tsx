@@ -113,8 +113,8 @@ export default function LoginModal() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg, #D49994 0%, #B27A75 100%)' }}
+            className="btn btn-primary w-full tracking-cn disabled:opacity-60"
+            style={{ padding: '12px 0', borderRadius: 14, fontSize: 14 }}
           >
             {loading ? '登录中...' : '登 录'}
           </button>
